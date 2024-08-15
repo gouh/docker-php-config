@@ -1,7 +1,7 @@
 #!/bin/bash
 
 UID = $(shell id -u)
-PHP_CONTAINER = spei_front_server_php
+PHP_CONTAINER = my_php
 
 help: ## Show this help message
 	@echo 'usage: make [target]'
