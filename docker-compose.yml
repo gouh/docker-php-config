@@ -1,0 +1,40 @@
+services:
+  php:
+    build:
+      context: ./php
+      args:
+        TZ: '${WORKSPACE_TIMEZONE}'
+        PHP_VERSION: '${PHP_VERSION}'
+        PROJECT_NAME: '${COMPOSE_PROJECT_NAME}'
+        UID: $U_ID
+    container_name: '${PHP_FPM_CONTAINER}'
+    volumes:
+      - '${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}'
+    environment:
+      - TZ=${WORKSPACE_TIMEZONE}
+      - PHP_IDE_CONFIG=serverName=www.${COMPOSE_PROJECT_NAME}.com
+      - XDEBUG_CLIENT_HOST=172.17.0.1
+      - XDEBUG_CLIENT_PORT=9000
+
+  nginx:
+    container_name: '${NGINX_CONTAINER}'
+    image: 'nginx:alpine'
+    volumes:
+      - '${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}'
+      - './nginx/nginx.conf:/etc/nginx/nginx.conf'
+      - '${NGINX_HOST_LOG_PATH}:/var/log/nginx'
+      - '${NGINX_SITES_PATH}:/etc/nginx/templates'
+    environment:
+      - 'VIRTUAL_HOST=${NGINX_VHOST}'
+      - 'PHP_FPM_CONTAINER=${PHP_FPM_CONTAINER}'
+      - 'CODE_PATH=${APP_CODE_PATH_CONTAINER}'
+      - 'PROJECT_NAME=${COMPOSE_PROJECT_NAME}'
+    links:
+      - php
+    ports:
+      - '${NGINX_LOCAL_PORT}:80'
+
+networks:
+  default:
+    name: '${NETWORK_NAME}'
+    external: true
